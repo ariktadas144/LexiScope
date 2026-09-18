@@ -1,1 +1,1 @@
-export const samplePrograms = { 'Arithmetic intro': `let base = 7;\nlet bonus = 5;\nprint base + bonus * 2;`, 'Boolean branch': `let ready = true;\nprint ready;` }
+export const samplePrograms = { 'Arithmetic intro': `let base = 7;\nlet bonus = 5;\nprint base + bonus * 2;`, 'Boolean branch': `let ready = true;\nprint ready;`, 'Lexical error demo': `let value = 4 @ 2;` }
