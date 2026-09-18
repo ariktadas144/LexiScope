@@ -1,0 +1,1 @@
+import { describe, expect, it } from 'vitest'; import { lex } from '../lexer/lexer'; import { parse } from './parser'; describe('parser', () => { it('creates a program node', () => { const program = parse(lex('print 2 + 3;')); expect(program.type).toBe('program'); expect(program.body).toHaveLength(1) }) })

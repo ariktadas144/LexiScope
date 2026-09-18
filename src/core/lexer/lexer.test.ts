@@ -1,0 +1,1 @@
+import { describe, expect, it } from 'vitest'; import { lex } from './lexer'; describe('lexer', () => { it('recognizes declarations and operators', () => { const tokens = lex('let total = 4 + 2;'); expect(tokens.map((token) => token.lexeme)).toEqual(['let', 'total', '=', '4', '+', '2', ';', '']) }) })

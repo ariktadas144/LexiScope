@@ -1,0 +1,13 @@
+program      = { statement } ;
+statement    = declaration | print-statement ;
+declaration  = "let" , identifier , "=" , expression , ";" ;
+print-statement = "print" , expression , ";" ;
+expression   = primary , { operator , primary } ;
+primary      = number | boolean | string | identifier ;
+operator     = "+" | "-" | "*" | "/" ;
+identifier   = letter , { letter | digit | "_" } ;
+number       = digit , { digit | "." } ;
+boolean      = "true" | "false" ;
+string       = '"' , { character } , '"' ;
+letter       = "A".."Z" | "a".."z" ;
+digit        = "0".."9" ;

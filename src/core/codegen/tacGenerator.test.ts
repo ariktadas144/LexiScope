@@ -1,0 +1,1 @@
+import { describe, expect, it } from 'vitest'; import { lex } from '../lexer/lexer'; import { parse } from '../parser/parser'; import { generateTac } from './tacGenerator'; describe('TAC generator', () => { it('emits print instructions', () => { expect(generateTac(parse(lex('print 2;')))[0].op).toBe('print') }) })

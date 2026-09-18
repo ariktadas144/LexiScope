@@ -1,0 +1,1 @@
+import { describe, expect, it } from 'vitest'; import { lex } from '../lexer/lexer'; import { parse } from '../parser/parser'; import { analyze } from './analyzer'; describe('semantic analyzer', () => { it('records declared symbols', () => { expect(analyze(parse(lex('let value = 4;'))).values()[0].name).toBe('value') }) })

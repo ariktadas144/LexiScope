@@ -1,0 +1,1 @@
+export function ErrorPanel({ error }: { error?: { stage: string; message: string; line?: number } }) { return error ? <div className="error-panel"><span className="error-badge">{error.stage}</span><span>{error.message}</span>{error.line ? <span>line {error.line}</span> : null}</div> : null }

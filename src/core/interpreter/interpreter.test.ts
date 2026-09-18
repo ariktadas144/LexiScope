@@ -1,0 +1,1 @@
+import { describe, expect, it } from 'vitest'; import { lex } from '../lexer/lexer'; import { parse } from '../parser/parser'; import { interpret } from './interpreter'; describe('interpreter', () => { it('evaluates a print statement', () => { expect(interpret(parse(lex('print 2 + 3;'))).output).toEqual(['5']) }) })

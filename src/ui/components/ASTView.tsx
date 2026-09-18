@@ -1,0 +1,1 @@
+import type { Program } from '../../core/parser/ast'; export function ASTView({ ast }: { ast?: Program }) { return <pre className="tree-view">{ast ? JSON.stringify(ast, null, 2) : 'AST appears after a valid parse.'}</pre> }

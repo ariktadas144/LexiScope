@@ -1,0 +1,1 @@
+import type { Token } from '../../core/lexer/token'; export function TokenView({ tokens }: { tokens: Token[] }) { return <div className="token-list">{tokens.filter((token) => token.kind !== 'eof').map((token, index) => <span className={`token token-${token.kind}`} key={`${token.line}-${token.column}-${index}`}>{token.lexeme}</span>)}</div> }
