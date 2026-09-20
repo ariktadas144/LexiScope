@@ -2,7 +2,7 @@
 
 ### An interactive web-based playground and real-time visualization tool for compiler phases
 
-**Name:** Arikta Das  
+**Name:** Arikta Das
 **Registration number:** 24BCE2303  
 **Course:** Compiler Design Lab Project
 
