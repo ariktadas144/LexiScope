@@ -38,7 +38,7 @@ LexiScope addresses this gap with a single interactive playground. It keeps the 
 
 ## Scope
 
-The intended Lexi language is a small imperative language with declarations, arithmetic and boolean expressions, assignment, conditionals, and loops. The current working slice supports `let` declarations, `print`, numeric and boolean literals, identifiers, and arithmetic operators. The conditional, loop, assignment, comparison, and logical-operator grammar is documented as the next language expansion.
+Lexi is a small imperative language: typed and inferred declarations (`let`, `int`, `boolean`, `string`), assignment, `print`, `if`/`else`/`else if`, `while`, block scoping, arithmetic (`+ - * / %`), comparison (`< > <= >=`), equality (`== !=`), logical operators (`&& ||`, short-circuiting) and unary `! -`, with standard precedence and parentheses. See [docs/language-spec.md](docs/language-spec.md) and [docs/grammar.ebnf](docs/grammar.ebnf) for the full grammar.
 
 ## Architecture
 
@@ -59,8 +59,8 @@ The core pipeline is framework-agnostic TypeScript. The UI is a responsive React
 | Layer | Technology |
 | --- | --- |
 | Language | TypeScript |
-| Compiler core | Hand-written lexer, recursive-descent parser, semantic analyzer, TAC generator, interpreter |
-| Front end | React 19 |
+| Compiler core | Hand-written lexer, recursive-descent parser, semantic analyzer, TAC generator with constant folding, TAC-executing interpreter |
+| Front end | React 19, CodeMirror 6 (syntax highlighting, inline error diagnostics) |
 | Styling | Responsive CSS with Space Grotesk and DM Mono Google Fonts |
 | Build tooling | Vite and Node.js |
 | Icons | lucide-react |
@@ -110,44 +110,42 @@ tests/fixtures/            Valid and invalid Lexi programs
 
 ## Phase 1 Deliverable Review
 
+Phase 1 delivered the project documentation, tooling setup, the lexer, and an initial playground UI with a token view, output and error panel. See the git history for that milestone.
+
+## Phase 2: Core Implementation
+
 ### Completed
 
-- [x] Project title, abstract, problem statement, motivation, objectives, and scope documented here.
-- [x] `docs/language-spec.md` and `docs/grammar.ebnf` exist.
-- [x] TypeScript, React, Vite, Vitest, Oxlint, Git, and GitHub setup completed.
-- [x] `src/core/lexer/token.ts` defines token kinds and token positions.
-- [x] `src/core/lexer/lexer.ts` implements a hand-written scanner.
-- [x] Lexical failures are reported with a lexical stage and line information.
-- [x] `src/core/lexer/lexer.test.ts` exists and the test suite passes.
-- [x] `src/core/pipeline.ts` exposes structured pipeline output.
-- [x] The playground has a source editor, live token view, output, and error panel.
-- [x] Three selectable examples exist, including a deliberate lexical error.
-- [x] Local setup and review workflow are documented.
-- [x] Initial commit is pushed to GitHub.
+- [x] Full pipeline wired end to end: lexer -> parser/AST -> semantic analyzer + symbol table -> TAC generator (with constant folding) -> TAC-executing interpreter.
+- [x] Language grammar expanded to `if`/`else`/`else if`, `while`, block scoping, assignment, comparison (`< > <= >=`), equality (`== !=`), logical `&&`/`||` (short-circuiting), unary `!`/`-`, parentheses, and full operator precedence.
+- [x] Explicit types (`int`, `boolean`, `string`) alongside inferred `let`; declared-type checking, assignment-type checking, and operand-type checking throughout.
+- [x] Nested, scope-aware symbol table (a stack of scopes) with redeclaration checks and unique names for shadowed variables.
+- [x] Three-address code has labels, `goto` and `ifFalse` for `if`/`while`, plus short-circuit lowering for `&&`/`||`.
+- [x] The interpreter is a virtual machine that executes the generated TAC (not the AST), with a step limit (guards against infinite loops) and an output-line limit.
+- [x] Constant folding is integrated into the pipeline; the UI can toggle between optimized and unoptimized TAC.
+- [x] Runtime errors: division/modulo by zero, 32-bit integer overflow, step-limit exceeded.
+- [x] CodeMirror 6 editor with Lexi syntax highlighting and inline error diagnostics (underline + gutter marker at the exact failure position), replacing the Phase 1 textarea.
+- [x] Debounced compile-as-you-type (`useCompilerPipeline`, 300 ms).
+- [x] Expandable/collapsible AST tree view (click to expand/collapse a node), replacing the flat JSON dump.
+- [x] Sortable symbol table (click a column header), showing name, type, scope and the variable's final value.
+- [x] Pipeline diagnostics panel reflects real per-stage status (ok / error / skipped, i.e. "not reached").
+- [x] 147 automated tests: unit tests per module, a fixture runner over `tests/fixtures/` (11 valid programs, 15 invalid programs across all four error stages), full-pipeline integration tests, and a randomized differential test that checks thousands of generated expressions against an independent BigInt reference evaluator.
+- [x] `npm run lint` (Oxlint), `npm run build` (type-check + production bundle) and `npm test` all pass.
 
 ### Partially completed or planned
 
-- [ ] The full Phase 1 language specification includes `int`, `bool`, assignment, comparisons, and logical operators; the current executable subset is smaller.
-- [ ] The requested `docs/architecture-diagram.png` is represented by the architecture diagram in this README; a standalone PNG has not been added.
-- [ ] The editor is a resilient textarea fallback, not CodeMirror with syntax highlighting.
-- [ ] The UI updates immediately through a React-derived pipeline result; a dedicated 300 ms debounce hook is still planned.
-- [ ] The token view currently uses categorized token chips rather than a full index/type/lexeme/line/column table.
-- [ ] The AST is rendered as a structured JSON view, not yet as an interactive graph.
-- [ ] Lexer tests need additional explicit unknown-character and unterminated-string cases for the full checklist.
-
-### Beyond Phase 1
-
-The repository already implements more than the Phase 1 prototype: parsing and AST construction, semantic identifier/type checks, a symbol table, three-address code generation, interpretation, focused tests for all of those stages, and UI panels for AST, symbols, TAC, and output. Constant folding is present as an isolated optimizer utility but is not yet wired into the pipeline.
+- [ ] No dead-code elimination or other optimizations beyond constant folding.
+- [ ] No `for` loops, functions, or arrays; Lexi remains a mini-language by design.
+- [ ] Error recovery reports only the first error per phase; there is no multi-error reporting.
+- [ ] No source maps back from TAC to AST beyond the line/column already carried on each instruction.
 
 ## Known Limitations and Next Steps
 
-1. Expand the parser and AST for `if`, `else`, `while`, assignment, comparison, and logical expressions.
-2. Add nested scope management, redeclaration checks, and explicit `int`/`bool` types.
-3. Integrate constant folding into TAC generation and show optimized versus unoptimized IR.
-4. Add a debounced compilation hook and richer token table columns.
-5. Add a graph-based AST renderer and a standalone architecture image.
-6. Increase negative-test coverage for every lexical and semantic error category.
+1. Add functions/procedures if time permits, as a further stretch goal.
+2. Add more aggressive optimizations (dead-code elimination, common-subexpression elimination) alongside constant folding.
+3. Add multi-error reporting (collect more than one diagnostic per compile) instead of stopping at the first.
+4. Continue growing the fixture and property-test suites as the language grows.
 
 ## Academic Context
 
-LexiScope applies finite-automaton-style scanning, LL-oriented recursive-descent parsing, AST-based analysis, symbol-table lookup, and machine-independent three-address code. It is intentionally educational: the implementation favors inspectable intermediate structures and clear phase boundaries over language completeness.
+LexiScope applies finite-automaton-style scanning, LL-oriented recursive-descent parsing with full operator-precedence climbing, AST-based semantic analysis with nested scopes, symbol-table lookup, machine-independent three-address code with control-flow lowering (labels/gotos), constant folding, and a small virtual machine that executes the generated IR. It is intentionally educational: the implementation favors inspectable intermediate structures and clear phase boundaries over language completeness.

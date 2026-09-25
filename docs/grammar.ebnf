@@ -1,13 +1,39 @@
-program      = { statement } ;
-statement    = declaration | print-statement ;
-declaration  = "let" , identifier , "=" , expression , ";" ;
-print-statement = "print" , expression , ";" ;
-expression   = primary , { operator , primary } ;
-primary      = number | boolean | string | identifier ;
-operator     = "+" | "-" | "*" | "/" ;
-identifier   = letter , { letter | digit | "_" } ;
-number       = digit , { digit | "." } ;
-boolean      = "true" | "false" ;
-string       = '"' , { character } , '"' ;
-letter       = "A".."Z" | "a".."z" ;
-digit        = "0".."9" ;
+(* Lexi grammar - Phase 2                                                    *)
+(* Operator precedence, lowest to highest binding:                          *)
+(*   ||  <  &&  <  (== !=)  <  (< > <= >=)  <  (+ -)  <  (* / %)  <  unary   *)
+
+program         = { statement } ;
+
+statement       = declaration
+                | assignment
+                | printStatement
+                | block
+                | ifStatement
+                | whileStatement ;
+
+declaration     = ( "let" | "int" | "boolean" | "string" ) , identifier ,
+                  "=" , expression , ";" ;
+assignment      = identifier , "=" , expression , ";" ;
+printStatement  = "print" , [ "(" ] , expression , [ ")" ] , ";" ;
+block           = "{" , { statement } , "}" ;
+ifStatement     = "if" , "(" , expression , ")" , block ,
+                  [ "else" , ( ifStatement | block ) ] ;
+whileStatement  = "while" , "(" , expression , ")" , block ;
+
+expression      = orExpr ;
+orExpr          = andExpr , { "||" , andExpr } ;
+andExpr         = equality , { "&&" , equality } ;
+equality        = comparison , { ( "==" | "!=" ) , comparison } ;
+comparison      = additive , { ( "<" | ">" | "<=" | ">=" ) , additive } ;
+additive        = term , { ( "+" | "-" ) , term } ;
+term            = unary , { ( "*" | "/" | "%" ) , unary } ;
+unary           = ( "!" | "-" ) , unary | primary ;
+primary         = number | "true" | "false" | string | identifier
+                | "(" , expression , ")" ;
+
+identifier      = letter , { letter | digit } ;
+number          = digit , { digit } ;
+string          = '"' , { character } , '"' ;
+comment         = "//" , { character } ;
+letter          = "a".."z" | "A".."Z" | "_" ;
+digit           = "0".."9" ;
